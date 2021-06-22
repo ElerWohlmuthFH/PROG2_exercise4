@@ -1,5 +1,6 @@
 package at.ac.fhcampuswien.newsanalyzer.ctrl;
 
+import at.ac.fhcampuswien.newsanalyzer.downloader.Downloader;
 import at.ac.fhcampuswien.newsapi.NewsApi;
 import at.ac.fhcampuswien.newsapi.beans.Article;
 import at.ac.fhcampuswien.newsapi.beans.NewsResponse;
@@ -34,7 +35,7 @@ public class Controller {
 		if(!newsResponse.getStatus().equals("ok")){
 			throw new NewsAPIException("News Response returned status " + newsResponse.getStatus());
 		}
-		
+
 		return newsResponse.getArticles();
 	}
 
@@ -75,13 +76,40 @@ public class Controller {
 		if(articles == null)
 			throw new NewsAPIException("Load data first");
 
-		return articles.stream()
-				.map(Article::getSource)
-				.collect(Collectors.groupingBy(Source::getName))
-				.entrySet()
-				.stream()
-				.max(Comparator.comparingInt(o -> o.getValue().size()))
-				.map(stringListEntry -> stringListEntry.getKey() + " " + stringListEntry.getValue().size())
-				.orElseThrow();
-	}
+        return articles.stream()
+                .map(Article::getSource)
+                .collect(Collectors.groupingBy(Source::getName))
+                .entrySet()
+                .stream()
+                .max(Comparator.comparingInt(o -> o.getValue().size()))
+                .map(stringListEntry -> stringListEntry.getKey() + " " + stringListEntry.getValue().size())
+                .orElseThrow();
+    }
+
+    private List<String> urlsToList() throws NewsAPIException {
+        if (articles == null)
+            throw new NewsAPIException("Load data first");
+
+        return articles.stream() //
+                .map(Article::getUrl) //
+                .collect(Collectors.toList());
+    }
+
+    public void downloadURL(Downloader downloader) throws NewsAPIException {
+
+        // start
+        long start = System.currentTimeMillis();
+
+        downloader.process(urlsToList());
+
+        // end
+        long finish = System.currentTimeMillis();
+        long timeElapsed = finish - start;
+
+        System.out.println(timeElapsed + " nanoseconds");
+
+        System.out.println(downloader.getClass().getName());
+
+    }
+
 }

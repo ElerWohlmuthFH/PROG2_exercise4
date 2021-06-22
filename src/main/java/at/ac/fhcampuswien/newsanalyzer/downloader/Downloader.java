@@ -1,5 +1,7 @@
 package at.ac.fhcampuswien.newsanalyzer.downloader;
 
+import at.ac.fhcampuswien.newsanalyzer.ctrl.NewsAPIException;
+
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -35,13 +37,18 @@ public abstract class Downloader {
                 os.write(b, 0, length);
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            e.getMessage();
         } finally {
             try {
-                Objects.requireNonNull(is).close();
-                Objects.requireNonNull(os).close();
+                if(is != null){
+                    Objects.requireNonNull(is).close();
+                }
+                if(os != null){
+                    Objects.requireNonNull(os).close();
+                }
+
             } catch (IOException e) {
-                e.printStackTrace();
+                e.getMessage();
             }
         }
         return fileName;
